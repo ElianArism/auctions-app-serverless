@@ -1,0 +1,39 @@
+# Metatada of the servicec
+service:
+  name: sls-integrador-elian
+
+plugins:
+  - serverless-bundle
+  - serverless-pseudo-parameters # easily interpolate aws parameters
+
+# information about the cloud provider and needed technologies
+provider:
+  name: aws
+  runtime: nodejs12.x
+  memorySize: 256
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+  # To grant access to any created resource, you need specify the roles/permissions
+  iamRoleStatements:
+    - ${file(resources/dynamo/auctions-table/iam-roles.yml):AuctionsTableIAM}
+
+# place to define props which aren't part of the sls framework core (plugins config for example)
+custom:
+  bundle:
+    linting: false
+
+# lambda functions of the stack
+functions:
+  createAuction:
+    handler: src/handlers/create-auction.handler
+
+    events:
+      - http:
+          method: GET
+          path: /create-auction
+
+# resources needed
+resources:
+  Resources:
+    # Cloudformation Syntax
+    AuctionsTable: ${file(resources/dynamo/auctions-table/definition.yml):AuctionsTable}
