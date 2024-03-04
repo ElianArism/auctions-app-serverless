@@ -1,4 +1,6 @@
-import { DynamoDB, IdGenerator } from "../services";
+import createError from "http-errors";
+import ENV from "../env";
+import { ApiMiddleware, DynamoDB, IdGenerator } from "../services";
 
 /**
  *
@@ -7,7 +9,7 @@ import { DynamoDB, IdGenerator } from "../services";
  * @returns auctionId
  */
 async function createAuction(event, context) {
-  const { title } = JSON.parse(event.body);
+  const { title } = event.body;
 
   const auctionDTO = {
     id: IdGenerator.generate(),
@@ -18,18 +20,15 @@ async function createAuction(event, context) {
 
   try {
     const db = new DynamoDB();
-    await db.put("AuctionsTable", auctionDTO);
+    await db.put(ENV.AUCTIONS_TABLE_NAME, auctionDTO);
 
     return {
       statusCode: 200,
       body: JSON.stringify({ auctionId: auctionDTO.id }),
     };
   } catch (error) {
-    return {
-      statusCode: error.status ?? 500,
-      body: JSON.stringify(error),
-    };
+    return createError.InternalServerError(error);
   }
 }
 
-export const handler = createAuction;
+export const handler = ApiMiddleware.use(createAuction);
