@@ -10,4 +10,12 @@ export class DynamoDB {
   put(TableName, Item) {
     return this.#client.put({ TableName, Item }).promise();
   }
+
+  scan(TableName) {
+    return this.#client.scan({ TableName }).promise();
+  }
+
+  getItemById(TableName, id) {
+    return this.#client.get({ TableName, Key: { id } }).promise();
+  }
 }
