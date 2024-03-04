@@ -13,6 +13,8 @@ provider:
   memorySize: 256
   stage: ${opt:stage, 'dev'}
   region: us-east-1
+  environment:
+    AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
   # To grant access to any created resource, you need specify the roles/permissions
   iamRoleStatements:
     - ${file(resources/dynamo/auctions-table/iam-roles.yml):AuctionsTableIAM}
@@ -21,16 +23,31 @@ provider:
 custom:
   bundle:
     linting: false
+  AuctionsTable:
+    name: !Ref AuctionsTable # return dynamodb name when created
 
 # lambda functions of the stack
 functions:
   createAuction:
     handler: src/handlers/create-auction.handler
+    events:
+      - http:
+          method: POST
+          path: /create-auction
 
+  getAuctions:
+    handler: src/handlers/get-auctions.handler
     events:
       - http:
           method: GET
-          path: /create-auction
+          path: /auctions
+
+  getAuctionById:
+    handler: src/handlers/get-auction-by-id.handler
+    events:
+      - http:
+          method: GET
+          path: /auction/{id}
 
 # resources needed
 resources:
