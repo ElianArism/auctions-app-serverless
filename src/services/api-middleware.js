@@ -5,7 +5,7 @@ import httpJsonBodyParser from "@middy/http-json-body-parser";
 
 export class ApiMiddleware {
   static use(handler) {
-    return middy(createAuction).use([
+    return middy(handler).use([
       httpJsonBodyParser(), // Parse our stringified input body
       httpEventNormalizer(), // Adjust api gateway event object and normalize it
       httpErrorHandler(), // Make our handling error process cleaner

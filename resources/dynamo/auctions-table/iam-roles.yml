@@ -1,8 +1,8 @@
 AuctionsTableIAM:
-  - Effect: Allow
-    Action:
-      - dynamodb:PutItem
-      - dynamodb:Scan
-      - dynamodb:GetItem
-    Resource:
-      - !GetAtt AuctionsTable.Arn
+  Effect: Allow
+  Action:
+    - dynamodb:PutItem
+    - dynamodb:Scan
+    - dynamodb:GetItem
+  Resource:
+    - !GetAtt AuctionsTable.Arn

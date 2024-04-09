@@ -18,4 +18,15 @@ export class DynamoDB {
   getItemById(TableName, id) {
     return this.#client.get({ TableName, Key: { id } }).promise();
   }
+
+  update(TableName, id, params) {
+    return this.#client
+      .update({
+        ...params,
+        TableName,
+        Key: { id },
+        ReturnValues: "ALL_NEW",
+      })
+      .promise();
+  }
 }
