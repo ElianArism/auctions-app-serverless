@@ -10,12 +10,16 @@ import { ApiMiddleware, DynamoDB, IdGenerator } from "../services";
  */
 async function createAuction(event, context) {
   const { title } = event.body;
+  const createdAt = new Date();
+  const endingAt = new Date();
+  endingAt.setHours(createdAt.getHours + 1);
 
   const auctionDTO = {
     id: IdGenerator.generate(),
     title,
     status: "OPEN",
-    createdAt: new Date().toISOString(),
+    createdAt: createdAt.toISOString(),
+    endingAt: endingAt.toISOString(),
     highestBid: {
       amount: 0,
     },
