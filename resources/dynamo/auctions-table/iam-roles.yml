@@ -4,5 +4,10 @@ AuctionsTableIAM:
     - dynamodb:PutItem
     - dynamodb:Scan
     - dynamodb:GetItem
+    - dynamodb:Query
   Resource:
     - !GetAtt AuctionsTable.Arn
+    - !Join [
+        "/",
+        [!GetAtt AuctionsTable.Arn, "index", "STATUS_AND_ENDING_AT"],
+      ]

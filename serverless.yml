@@ -5,6 +5,7 @@ plugins:
   - serverless-offline
   - serverless-esbuild
   - serverless-prune-plugin
+
 # information about the cloud provider and needed technologies
 provider:
   name: aws

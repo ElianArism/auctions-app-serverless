@@ -29,4 +29,26 @@ export class DynamoDB {
       })
       .promise();
   }
+
+  async searchByGSI(
+    tableName,
+    indexName,
+    {
+      FilterExpression,
+      ExpressionAttributeNames,
+      ExpressionAttributeValues,
+    }
+  ) {
+    const result = await this.#client
+      .query({
+        TableName: tableName,
+        IndexName: indexName,
+        FilterExpression,
+        ExpressionAttributeNames,
+        ExpressionAttributeValues,
+      })
+      .promise();
+
+    return result.Items;
+  }
 }
