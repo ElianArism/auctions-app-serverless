@@ -1,11 +1,12 @@
+import ENV from "../env";
 import { DynamoDB } from "./dynamo-db";
 
-export const getEndedAuctions = async (event) => {
+export const getEndedAuctions = async () => {
   try {
     const db = new DynamoDB();
     const now = new Date();
-    db.searchByGSI(
-      process.env.AUCTIONS_TABLE,
+    const result = await db.searchByGSI(
+      ENV.AUCTIONS_TABLE_NAME,
       "STATUS_AND_ENDING_AT",
       {
         FilterExpression:
@@ -19,6 +20,7 @@ export const getEndedAuctions = async (event) => {
         },
       }
     );
+    return result;
   } catch (error) {
     throw error;
   }

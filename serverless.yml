@@ -1,5 +1,6 @@
 # Metatada of the servicec
 service: sls-integrador-elian-${self:provider.stage}
+frameworkVersion: "3"
 
 plugins:
   - serverless-offline
@@ -9,12 +10,11 @@ plugins:
 # information about the cloud provider and needed technologies
 provider:
   name: aws
-  runtime: nodejs20.x
-  memorySize: 256
+  runtime: nodejs16.x
   stage: ${opt:stage, 'dev'}
   region: us-east-1
   environment:
-    AUCTIONS_TABLE_NAME: ${self:custom.AuctionsTable.name}
+    AUCTIONS_TABLE_NAME: ${self:resources.Resources.AuctionsTable.Properties.TableName}
   # To grant access to any created resource, you need specify the roles/permissions
   iamRoleStatements:
     - ${file(resources/dynamo/auctions-table/iam-roles.yml):AuctionsTableIAM}
@@ -22,39 +22,48 @@ provider:
 # place to define props which aren't part of the sls framework core (plugins config for example)
 custom:
   bundle:
+    bundle: true
+    minify: true
+    sourcemap: true
     linting: false
-  AuctionsTable:
-    name: !Ref AuctionsTable # return dynamodb name when created
-
 # lambda functions of the stack
 functions:
+  health:
+    handler: src/handlers/health.handler
+    events:
+      - http:
+          method: GET
+          path: health
+
   createAuction:
     handler: src/handlers/create-auction.handler
     events:
       - http:
           method: POST
-          path: /create-auction
+          path: create-auction
+          cors: true
 
   getAuctions:
     handler: src/handlers/get-auctions.handler
     events:
       - http:
           method: GET
-          path: /auctions
+          path: auctions
 
   getAuctionById:
     handler: src/handlers/get-auction-by-id.handler
     events:
       - http:
           method: GET
-          path: /auction/{id}
+          path: auction/{id}
 
   placeBid:
     handler: src/handlers/place-bid.handler
     events:
       - http:
           method: PATCH
-          path: /auction/{id}/bid
+          path: auction/{id}/bid
+          cors: true
 
   processAuction:
     handler: src/handlers/process-auction.handler

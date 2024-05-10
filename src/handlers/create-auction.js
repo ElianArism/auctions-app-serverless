@@ -1,5 +1,3 @@
-import createError from "http-errors";
-import ENV from "../env";
 import { ApiMiddleware, DynamoDB, IdGenerator } from "../services";
 
 /**
@@ -12,7 +10,7 @@ async function createAuction(event, context) {
   const { title } = event.body;
   const createdAt = new Date();
   const endingAt = new Date();
-  endingAt.setHours(createdAt.getHours + 1);
+  endingAt.setHours(createdAt.getHours() + 1);
 
   const auctionDTO = {
     id: IdGenerator.generate(),
@@ -26,15 +24,21 @@ async function createAuction(event, context) {
   };
 
   try {
+    console.log("SE EJECUTA CREATE AUCTION");
     const db = new DynamoDB();
-    await db.put(ENV.AUCTIONS_TABLE_NAME, auctionDTO);
+    let tableName = process.env.AUCTIONS_TABLE_NAME;
+    await db.put(tableName, auctionDTO);
 
     return {
       statusCode: 200,
       body: JSON.stringify({ auctionId: auctionDTO.id }),
     };
   } catch (error) {
-    return createError.InternalServerError(error);
+    console.log(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify(error),
+    };
   }
 }
 

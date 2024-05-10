@@ -21,5 +21,6 @@ AuctionsTable:
             KeyType: HASH
           - AttributeName: endingAt
             KeyType: RANGE
-        Projection: "ALL"
+        Projection:
+          ProjectionType: ALL
 # https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/GSI.html

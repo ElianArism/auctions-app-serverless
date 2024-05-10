@@ -5,6 +5,8 @@ AuctionsTableIAM:
     - dynamodb:Scan
     - dynamodb:GetItem
     - dynamodb:Query
+    - dynamodb:Update
+    - dynamodb:UpdateItem
   Resource:
     - !GetAtt AuctionsTable.Arn
     - !Join [
