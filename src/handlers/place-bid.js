@@ -1,12 +1,13 @@
 import createHttpError from "http-errors";
+import ENV from "../env";
 import { ApiMiddleware, DynamoDB } from "../services";
 
 export async function placeBid(event, context) {
   try {
     const { amount } = event.body;
     const db = new DynamoDB();
-    const { Item: auction } = await db.getAuctionById(
-      process.env.AUCTIONS_TABLE_NAME,
+    const { Item: auction } = await db.getItemById(
+      ENV.AUCTIONS_TABLE_NAME,
       event.pathParameters.id
     );
 
@@ -14,7 +15,7 @@ export async function placeBid(event, context) {
       return createHttpError.NotFound(
         `Auction with id ${id} does not exist`
       );
-    } else if (auction.highestBid.amount <= amount) {
+    } else if (auction.highestBid.amount >= amount) {
       throw new createHttpError.Forbidden(
         "Your bid must be higher than $" + auction.highestBid.amount
       );
@@ -26,17 +27,20 @@ export async function placeBid(event, context) {
     };
 
     const result = await db.update(
-      process.env.AUCTIONS_TABLE_NAME,
-      event.pathParameters.id,
+      ENV.AUCTIONS_TABLE_NAME,
+      { key: "id", value: event.pathParameters.id },
       params
     );
 
     return {
       statusCode: 200,
-      body: JSON.stringify(result.Attributes),
+      body: JSON.stringify(result),
     };
   } catch (error) {
-    return createHttpError.InternalServerError(error);
+    return {
+      statusCode: error?.status || 500,
+      body: JSON.stringify(error),
+    };
   }
 }
 

@@ -1,14 +1,35 @@
-import AWS from "aws-sdk";
+import { DynamoDB as DB } from "aws-sdk";
 
 export class DynamoDB {
   #client;
 
   constructor() {
-    this.#client = new AWS.DynamoDB.DocumentClient();
+    this.#client = new DB.DocumentClient({ region: "us-east-1" });
   }
 
   put(TableName, Item) {
     return this.#client.put({ TableName, Item }).promise();
+  }
+
+  update(
+    TableName,
+    primaryKey,
+    {
+      ExpressionAttributeNames = undefined,
+      ExpressionAttributeValues,
+      UpdateExpression,
+    }
+  ) {
+    return this.#client
+      .update({
+        TableName,
+        Key: { [primaryKey.key]: primaryKey.value },
+        ExpressionAttributeNames,
+        ExpressionAttributeValues,
+        UpdateExpression,
+        ReturnValues: "ALL_NEW",
+      })
+      .promise();
   }
 
   scan(TableName) {
@@ -17,17 +38,6 @@ export class DynamoDB {
 
   getItemById(TableName, id) {
     return this.#client.get({ TableName, Key: { id } }).promise();
-  }
-
-  update(TableName, id, params) {
-    return this.#client
-      .update({
-        ...params,
-        TableName,
-        Key: { id },
-        ReturnValues: "ALL_NEW",
-      })
-      .promise();
   }
 
   async searchByGSI(

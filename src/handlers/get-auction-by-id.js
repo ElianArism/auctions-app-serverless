@@ -1,11 +1,12 @@
 import createHttpError from "http-errors";
+import ENV from "../env";
 import { ApiMiddleware, DynamoDB } from "../services";
 
 export async function getAuctionById(event, context) {
   try {
     const db = new DynamoDB();
     const result = await db.getAuctionById(
-      process.env.AUCTIONS_TABLE_NAME,
+      ENV.AUCTIONS_TABLE_NAME,
       event.pathParameters.id
     );
     if (!result.Item) {
