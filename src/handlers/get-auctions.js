@@ -1,19 +1,51 @@
-import createHttpError from "http-errors";
+import validator from "@middy/validator";
+import { transpileSchema } from "@middy/validator/transpile";
 import ENV from "../env";
-import { DynamoDB } from "../services";
+import { GET_AUCTIONS_SCHEMA } from "../schemas/get-auctions";
+import { ApiMiddleware, DynamoDB } from "../services";
 
-export async function getAuctions(event, context) {
+async function getAuctions(event, context) {
   try {
+    const { status } = event.queryStringParameters;
     const db = new DynamoDB();
-    const result = await db.scan(ENV.AUCTIONS_TABLE_NAME);
+
+    const result = await db.searchByGSI(
+      ENV.AUCTIONS_TABLE_NAME,
+      ENV.GSI_STATUS_AND_ENDING_AT,
+      {
+        KeyConditionExpression: "#status = :status",
+        ExpressionAttributeNames: {
+          "#status": "status",
+        },
+        ExpressionAttributeValues: {
+          ":status": status,
+        },
+      }
+    );
+
+    if (!result.length) {
+      return {
+        statusCode: 404,
+        body: "No items found",
+      };
+    }
+
     return {
       statusCode: 200,
-      body: JSON.stringify(result.Items),
+      body: JSON.stringify(result),
     };
   } catch (error) {
-    console.log(error);
-    return createHttpError.InternalServerError(error);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error, message: error?.message ?? "" }),
+    };
   }
 }
 
-export const handler = getAuctions;
+export const handler = ApiMiddleware.use(getAuctions).use(
+  validator({
+    eventSchema: transpileSchema(GET_AUCTIONS_SCHEMA, {
+      useDefaults: true,
+    }),
+  })
+);

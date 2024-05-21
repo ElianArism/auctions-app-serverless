@@ -1,3 +1,4 @@
+import { AUCTION_STATUSES } from "../enums/auction-statuses";
 import { ApiMiddleware, DynamoDB, IdGenerator } from "../services";
 
 /**
@@ -15,7 +16,7 @@ async function createAuction(event, context) {
   const auctionDTO = {
     id: IdGenerator.generate(),
     title,
-    status: "OPEN",
+    status: AUCTION_STATUSES.OPEN,
     createdAt: createdAt.toISOString(),
     endingAt: endingAt.toISOString(),
     highestBid: {
