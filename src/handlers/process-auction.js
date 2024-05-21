@@ -18,7 +18,7 @@ async function processAuction(command, ctx) {
       )
     );
     const results = await Promise.all(closeOperations);
-    console.log(results);
+
     return {
       closedAuctions: results.length,
     };

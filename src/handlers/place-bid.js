@@ -1,4 +1,5 @@
 import createHttpError from "http-errors";
+import { AUCTION_STATUSES } from "../enums/auction-statuses";
 import ENV from "../env";
 import { ApiMiddleware, DynamoDB } from "../services";
 
@@ -19,7 +20,10 @@ export async function placeBid(event, context) {
       throw new createHttpError.Forbidden(
         "Your bid must be higher than $" + auction.highestBid.amount
       );
-    }
+    } else if (auction.status === AUCTION_STATUSES.CLOSED)
+      throw new createHttpError.Forbidden(
+        "You cannot bid on closed auctions"
+      );
 
     const params = {
       UpdateExpression: "set highestBid.amount = :amount",

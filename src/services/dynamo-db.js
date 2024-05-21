@@ -32,6 +32,7 @@ export class DynamoDB {
       .promise();
   }
 
+  // REVIEW: You always should avoid the use of scan
   scan(TableName) {
     return this.#client.scan({ TableName }).promise();
   }
@@ -44,7 +45,7 @@ export class DynamoDB {
     tableName,
     indexName,
     {
-      FilterExpression,
+      KeyConditionExpression,
       ExpressionAttributeNames,
       ExpressionAttributeValues,
     }
@@ -53,7 +54,7 @@ export class DynamoDB {
       .query({
         TableName: tableName,
         IndexName: indexName,
-        FilterExpression,
+        KeyConditionExpression,
         ExpressionAttributeNames,
         ExpressionAttributeValues,
       })
