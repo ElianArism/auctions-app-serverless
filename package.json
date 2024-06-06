@@ -16,6 +16,7 @@
     "@middy/validator": "^5.3.5",
     "aws-sdk": "^2.1617.0",
     "http-errors": "^2.0.0",
+    "jsonwebtoken": "^9.0.2",
     "serverless-bundle": "^6.1.0",
     "serverless-domain-manager": "^7.3.8",
     "serverless-esbuild": "^1.52.1",
