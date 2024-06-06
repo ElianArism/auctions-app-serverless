@@ -15,6 +15,7 @@ provider:
   region: us-east-1
   environment:
     AUCTIONS_TABLE_NAME: ${self:resources.Resources.AuctionsTable.Properties.TableName}
+    AUTH_KEY: ${file(secret.pem)}
   # To grant access to any created resource, you need specify the roles/permissions
   iamRoleStatements:
     - ${file(resources/dynamo/auctions-table/iam-roles.yml):AuctionsTableIAM}
@@ -34,6 +35,7 @@ functions:
       - http:
           method: GET
           path: health
+          authorizer: authLambda
 
   createAuction:
     handler: src/handlers/create-auction.handler
@@ -72,8 +74,33 @@ functions:
     #   - schedule:
     #       name: process_auction
     #       rate: rate(1 minute)
+
+  authLambda:
+    handler: src/auth/authorizer.handler
+
 # resources needed
 resources:
   Resources:
     # Cloudformation Syntax
     AuctionsTable: ${file(resources/dynamo/auctions-table/definition.yml):AuctionsTable}
+    # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
+    GatewayResponse:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: EXPIRED_TOKEN
+        RestApiId:
+          Ref: "ApiGatewayRestApi"
+        StatusCode: "401"
+    AuthFailureGatewayResponse:
+      Type: "AWS::ApiGateway::GatewayResponse"
+      Properties:
+        ResponseParameters:
+          gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+          gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+        ResponseType: UNAUTHORIZED
+        RestApiId:
+          Ref: "ApiGatewayRestApi"
+        StatusCode: "401"

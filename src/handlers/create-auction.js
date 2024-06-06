@@ -1,4 +1,7 @@
+import validator from "@middy/validator";
+import { transpileSchema } from "@middy/validator/transpile";
 import { AUCTION_STATUSES } from "../enums/auction-statuses";
+import { CREATE_AUCTION_SCHEMA } from "../schemas/create-auction";
 import { ApiMiddleware, DynamoDB, IdGenerator } from "../services";
 
 /**
@@ -25,7 +28,6 @@ async function createAuction(event, context) {
   };
 
   try {
-    console.log("SE EJECUTA CREATE AUCTION");
     const db = new DynamoDB();
     let tableName = process.env.AUCTIONS_TABLE_NAME;
     await db.put(tableName, auctionDTO);
@@ -35,7 +37,6 @@ async function createAuction(event, context) {
       body: JSON.stringify({ auctionId: auctionDTO.id }),
     };
   } catch (error) {
-    console.log(error);
     return {
       statusCode: 500,
       body: JSON.stringify(error),
@@ -43,4 +44,6 @@ async function createAuction(event, context) {
   }
 }
 
-export const handler = ApiMiddleware.use(createAuction);
+export const handler = ApiMiddleware.use(createAuction).use(
+  validator({ eventSchema: transpileSchema(CREATE_AUCTION_SCHEMA) })
+);

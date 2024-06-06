@@ -1,6 +1,9 @@
+import validator from "@middy/validator";
+import { transpileSchema } from "@middy/validator/transpile";
 import createHttpError from "http-errors";
 import { AUCTION_STATUSES } from "../enums/auction-statuses";
 import ENV from "../env";
+import { PLACE_BID_SCHEMA } from "../schemas";
 import { ApiMiddleware, DynamoDB } from "../services";
 
 export async function placeBid(event, context) {
@@ -48,4 +51,6 @@ export async function placeBid(event, context) {
   }
 }
 
-export const handler = ApiMiddleware.use(placeBid);
+export const handler = ApiMiddleware.use(placeBid).use(
+  validator({ eventSchema: transpileSchema(PLACE_BID_SCHEMA) })
+);
