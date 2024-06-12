@@ -44,6 +44,7 @@ functions:
           method: POST
           path: create-auction
           cors: true
+          authorizer: authLambda
 
   getAuctions:
     handler: src/handlers/get-auctions.handler
@@ -51,6 +52,7 @@ functions:
       - http:
           method: GET
           path: auctions
+          authorizer: authLambda
 
   getAuctionById:
     handler: src/handlers/get-auction-by-id.handler
@@ -58,6 +60,7 @@ functions:
       - http:
           method: GET
           path: auction/{id}
+          authorizer: authLambda
 
   placeBid:
     handler: src/handlers/place-bid.handler
@@ -66,6 +69,7 @@ functions:
           method: PATCH
           path: auction/{id}/bid
           cors: true
+          authorizer: authLambda
 
   processAuction:
     handler: src/handlers/process-auction.handler

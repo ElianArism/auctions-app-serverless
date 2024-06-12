@@ -12,6 +12,7 @@ import { ApiMiddleware, DynamoDB, IdGenerator } from "../services";
  */
 async function createAuction(event, context) {
   const { title } = event.body;
+  const { claims: userData } = event.requestContext.authorizer;
   const createdAt = new Date();
   const endingAt = new Date();
   endingAt.setHours(createdAt.getHours() + 1);
@@ -24,6 +25,10 @@ async function createAuction(event, context) {
     endingAt: endingAt.toISOString(),
     highestBid: {
       amount: 0,
+    },
+    seller: {
+      email: userData.email,
+      username: userData.nickname,
     },
   };
 

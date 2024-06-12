@@ -5,7 +5,7 @@ import { ApiMiddleware, DynamoDB } from "../services";
 export async function getAuctionById(event, context) {
   try {
     const db = new DynamoDB();
-    const result = await db.getAuctionById(
+    const result = await db.getItemById(
       ENV.AUCTIONS_TABLE_NAME,
       event.pathParameters.id
     );
