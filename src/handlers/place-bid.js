@@ -9,6 +9,8 @@ import { ApiMiddleware, DynamoDB } from "../services";
 export async function placeBid(event, context) {
   try {
     const { amount } = event.body;
+    const { claims: userData } = event.requestContext.authorizer;
+
     const db = new DynamoDB();
     const { Item: auction } = await db.getItemById(
       ENV.AUCTIONS_TABLE_NAME,
@@ -29,8 +31,15 @@ export async function placeBid(event, context) {
       );
 
     const params = {
-      UpdateExpression: "set highestBid.amount = :amount",
-      ExpressionAttributeValues: { ":amount": amount },
+      UpdateExpression:
+        "set highestBid.amount = :amount, highestBid.bidder = :bidder",
+      ExpressionAttributeValues: {
+        ":amount": amount,
+        ":bidder": {
+          username: userData.nickname,
+          email: userData.email,
+        },
+      },
     };
 
     const result = await db.update(
