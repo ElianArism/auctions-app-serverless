@@ -1,10 +1,20 @@
+import { SQS } from "aws-sdk";
 import createHttpError from "http-errors";
 import ENV from "../env";
-import { DynamoDB, getEndedAuctions } from "../services";
+import { NotifyAuctionsService } from "../libs";
+import {
+  DynamoDB,
+  NotificationService,
+  getEndedAuctions,
+} from "../services";
+
+const db = new DynamoDB();
+const notificationService = new NotificationService(
+  new SQS({ region: ENV.region })
+);
 
 async function processAuction(command, ctx) {
   try {
-    const db = new DynamoDB();
     const auctionsToClose = await getEndedAuctions();
     const closeOperations = auctionsToClose.map((a) =>
       db.update(
@@ -18,6 +28,11 @@ async function processAuction(command, ctx) {
       )
     );
     const results = await Promise.all(closeOperations);
+
+    await NotifyAuctionsService.notifyClosedAuctions(
+      auctionsToClose,
+      notificationService
+    );
 
     return {
       closedAuctions: results.length,

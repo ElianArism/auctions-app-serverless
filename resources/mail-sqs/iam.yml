@@ -1,0 +1,6 @@
+MailSQSConsumerIAM:
+  Effect: Allow
+  Action:
+    - sqs:SendMessage
+    - sqs:DeleteMessage
+  Resource: ${self:custom.MailQueue.arn}

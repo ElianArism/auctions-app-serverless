@@ -16,9 +16,12 @@ provider:
   environment:
     AUCTIONS_TABLE_NAME: ${self:resources.Resources.AuctionsTable.Properties.TableName}
     AUTH_KEY: ${file(secret.pem)}
+    MAIL_QUEUE_URL: ${self:custom.MailQueue.url}
+    REGION: ${self:provider.region}
   # To grant access to any created resource, you need specify the roles/permissions
   iamRoleStatements:
     - ${file(resources/dynamo/auctions-table/iam-roles.yml):AuctionsTableIAM}
+    - ${file(resources/mail-sqs/iam.yml):MailSQSConsumerIAM}
 
 # place to define props which aren't part of the sls framework core (plugins config for example)
 custom:
@@ -27,6 +30,11 @@ custom:
     minify: true
     sourcemap: true
     linting: false
+  # Import outputs from notification-service-stack
+  MailQueue:
+    arn: ${cf:notification-service-${self:provider.stage}}.MailQueueArn
+    url: ${cf:notification-service-${self:provider.stage}}.MailQueueUrl
+
 # lambda functions of the stack
 functions:
   health:
