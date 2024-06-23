@@ -14,6 +14,7 @@ provider:
   stage: ${opt:stage, 'dev'}
   region: us-east-1
   environment:
+    AUCTIONS_BUCKET_NAME: ${self:custom.AuctionsBucket.name}
     AUCTIONS_TABLE_NAME: ${self:resources.Resources.AuctionsTable.Properties.TableName}
     AUTH_KEY: ${file(secret.pem)}
     MAIL_QUEUE_URL: ${self:custom.MailQueue.url}
@@ -30,6 +31,8 @@ custom:
     minify: true
     sourcemap: true
     linting: false
+  AuctionsBucket:
+    name: sls-elian-auctions-s3-bucket-${self:provider.stage}
   # Import outputs from notification-service-stack
   MailQueue:
     arn: ${cf:notification-service-${self:provider.stage}}.MailQueueArn
@@ -79,6 +82,14 @@ functions:
           cors: true
           authorizer: authLambda
 
+  uploadAuctionPicture:
+    handler: src/handlers/upload-auction-picture.handler
+    events:
+      - http:
+          method: PATCH
+          path: auction/{id}/picture
+          authorizer: authLambda
+
   processAuction:
     handler: src/handlers/process-auction.handler
     # REVIEW Commented 4 now
@@ -94,6 +105,10 @@ functions:
 resources:
   Resources:
     # Cloudformation Syntax
+    # S3
+    AuctionsBucket: ${file(resources/buckets/auctions-bucket/auctions-bucket.yml):AuctionsBucket}
+    AuctionsBucketPolicy: ${file(resources/buckets/auctions-bucket/auctions-bucket.yml):AuctionsBucketPolicy}
+    # Dynamo
     AuctionsTable: ${file(resources/dynamo/auctions-table/definition.yml):AuctionsTable}
     # This response is needed for custom authorizer failures cors support ¯\_(ツ)_/¯
     GatewayResponse:
