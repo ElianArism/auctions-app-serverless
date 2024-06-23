@@ -1,0 +1,6 @@
+AuctionsBucketIAMRole:
+  Effect: "Allow"
+  Action:
+    - "s3:PutObject"
+    - "s3:upload"
+  Resource: arn::aws:s3:::${self:custom.AuctionsBucket.name}/*
